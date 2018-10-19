@@ -4,7 +4,7 @@ Source: https://www.youtube.com/playlist?list=PLNyQbpmrfJd6gFxEa8dT0iswijOIQDMJu
 --------------------
 1. Chef Workstation, Chef Server, Chef Client.
 2. Knife is the CLI on the workstation.
-3. Download and install the ChefDK on the workstation machine. Receipe is .rb file that works with one or more resources. A resource can be a file, package, etc.
+3. Download and install the ChefDK on the workstation machine. recipe is .rb file that works with one or more resources. A resource can be a file, package, etc.
     #Creates a file resource with fileName, must start with do and end.
     file "<fileName>" do
         #Creates the contents of the file
@@ -12,7 +12,7 @@ Source: https://www.youtube.com/playlist?list=PLNyQbpmrfJd6gFxEa8dT0iswijOIQDMJu
         #Performs an action on the file
         action :delete
     end
-4. chef-apply receipe.rb
+4. chef-apply recipe.rb
 5. Creating a package resource
     package "apache2" do
         #Install is also the default action
@@ -33,9 +33,9 @@ Since the default is install we can replace the above set of commands with simpl
         </html>"
     done
 8. To find out the different attributes for all resources check the chef documentation.
-9. The steps 5,6,7 can be combined and is a single receipe for installing apache2 and setting up homepage for apache2
-10. This receipe will be tested on workstation using the chef-apply command and then pushed to the server and the nodes will pick these cookbook automatically.
-11. We need to bundle the receipe as a Cookbook
+9. The steps 5,6,7 can be combined and is a single recipe for installing apache2 and setting up homepage for apache2
+10. This recipe will be tested on workstation using the chef-apply command and then pushed to the server and the nodes will pick these cookbook automatically.
+11. We need to bundle the recipe as a Cookbook
         chef generate cookbook <cookbookName>
         chef generate cookbook learn_chef_apache2
 12. tree command on the linux will list the directory structure in the form of a hierarchial strucutre tree.
@@ -43,13 +43,13 @@ Since the default is install we can replace the above set of commands with simpl
         chef generate template <cookbookName> <templateName>
         chef generate template learn_chef_apache2 index.html
     This will generate an .erb file in which we can have placeholders and variables.
-14. Starting point is the cookbookName/receipes/default.rb
-15. Now to use the template in the receipe file instead of creation the file resource use
+14. Starting point is the cookbookName/recipes/default.rb
+15. Now to use the template in the recipe file instead of creation the file resource use
         template '/var/www/html/index.html' do
             souce 'index.html.erb'
         end
 16. To run a cookbook
-        chef-client --local-mode --runlist 'receipe[<cookbookName>]'
+        chef-client --local-mode --runlist 'recipe[<cookbookName>]'
 17. We can use the cloud Chef server at http://manage.chef.io by creating an account. Then create an organisation which is like a cluster which have same policies. Goto administration and download the starter kit for that organisation. Unzip it. This will create new folders like nodes, .chef which will specify where the server is located.
 18. http://supermarket.chef.io has cookbooks which we can download and use.
 19. To download and install a cookbook from the supermarket
@@ -57,24 +57,25 @@ Since the default is install we can replace the above set of commands with simpl
     This will give us a tarball. Extract it and place it in the cookbooks folder
 20. To upload a cookbook to the server
         knife cookbook upload cookbookName
-21. To setup a node from workstation, this will setup the node with chef client and then run the receipe
-        knife bootstrap <ipOfTheNode> --ssh-user userName --ssh-password 'passWord' --sudo --use-sudo-password  --node-name cnode1 --run-list 'receipe[cookbookName]'
+21. To setup a node from workstation, this will setup the node with chef client and then run the recipe
+        knife bootstrap <ipOfTheNode> --ssh-user userName --ssh-password 'passWord' --sudo --use-sudo-password  --node-name cnode1 --run-list 'recipe[cookbookName]'
 22. List all the nodes from the workstation
         knife node list
+        knife node show --help
+        knife help nodeNode
         knife node show nodeName
-23. Node will then connect in 30mins to the server and check its status if it is required to run any receipes.
-24. Create receipes and cookbooks in the workstation and test it and upload it to the chef server. Configure the chef nodes to communicate with the chef server and get the receipes and cookbooks from the server and execute it.
-25. CONFIGURING THE CHEF SERVER: Download the chef server rpm and install it. To configure the server 
+23. Node will then connect in 30mins to the server and check its status if it is required to run any recipes.
+24. Create recipes and cookbooks in the workstation and test it and upload it to the chef server. Configure the chef nodes to communicate with the chef server and get the recipes and cookbooks from the server and execute it.
+******************************************************************************************************************************************
+******************************************************************************************************************************************
+******************************************************************************************************************************************
+25. ****CONFIGURING THE CHEF SERVER****: Download the chef server rpm and install it. To configure the server 
         chef-server-ctl reconfigure
         chef-server-ctl status
 The server UI can also be accessed at https://ipOfTheChefServer
-
-******************************************************************************************************************************************
-******************************************************************************************************************************************
-******************************************************************************************************************************************
-26. CONFIGURING THE CHEF WORKSTATION: Download the chef worstation rpm and install. We need to share the certificates between the server and the workstation for the communication to take place. The certificates (pem files) in the chef server will be available at  
+26. ****CONFIGURING THE CHEF WORKSTATION****: Download the chef worstation rpm and install. We need to share the certificates between the server and the workstation for the communication to take place. The certificates (pem files) in the chef server will be available at  
         /etc/chef-server
-    Create a .chef folder in the workstation and copy the 3 pem files to it.
+    Create a .chef folder in the workstation home directory and copy the 3 pem files to it.
     Configure the knife CLI on the worstation
         knife ssl fetch
         knife ssl check
@@ -82,7 +83,7 @@ The server UI can also be accessed at https://ipOfTheChefServer
     Enter the details of the chef server, user that exists on the chef server, location of admin.pem, chef-validator.pem and password of the user.
         knife client list
         knife user list
-27. CONFIGURING THE CHEF NODE: Download and install the chef node rpm. Since communication to the server is based on certificates create a directory /etc/chef and copy the chef-validator.pem from the server. Then fetch the certificates from the chef server
+27. ****CONFIGURING THE CHEF NODE****: Download and install the chef node rpm. Since communication to the server is based on certificates create a directory /etc/chef and copy the chef-validator.pem from the server. Then fetch the certificates from the chef server
         knife ssl fetch -s https://ipOftheChefServer
 In the home directory .chef folder we will see a folder trusted_certs with the server certificate.
         knife ssl check -s https://ipOftheChefServer
@@ -98,11 +99,11 @@ From the workstation
         knife user list
 28. To create a cookbook, this will be placed in /var/chef/cookbooks
         knife cookbook create cookbookName
-Navigate to the folder and inside receipes default.rb create a file with some contents. To test the validity of the cookbook/syntax errors
+Navigate to the folder and inside recipes default.rb create a file with some contents. To test the validity of the cookbook/syntax errors
         knife cookbook test cookbookName
         knife cookbook upload cookbookName
         knife cookbook list
-We can navigate to the server UI URL, open the nodes, and add this available receipe to the runlist and in the node machine to apply it
+We can navigate to the server UI URL, open the nodes, and add this available recipe to the runlist and in the node machine to apply it
         chef-client
 
 ******************************************************************************************************************************************
@@ -119,16 +120,112 @@ https://www.youtube.com/playlist?list=PLOibJV1fZEv2bbdXKknxi0Vhg9HTmjPVr
 Node - A node is any machine that is under the management of Chef (Physical, Virtual, Cloud, network device, etc)
 Chef Server - Acts as a hub for configuration data and stores cookbooks, policies that are applied to nodes and related metadata
 Chef Client - An agent that runs locally on every node that is under management by chef to bring the node into expected state.
-Knife - Tool that provides an interface between a local chef repo and the chef server and helps users manage nodes, cookbooks, receipes, roles and environments.
+Knife - Tool that provides an interface between a local chef repo and the chef server and helps users manage nodes, cookbooks, recipes, roles and environments.
 Ohai - Tool that is used to detect attributes  on a node,  and then provide these attributes to the chef client at the start of every chef-client run. Platform and Network details, CPU data and kernet data, Memory usage and other configuration details.
 8. State - Snapshot of configuration of the node.
 9. Nodes will periodically poll for updates from the chef-server and update it if it is not in the required state.
 10. Resources - Anything that we want to change or configure in the host. Files, Dirs, Users and Groups, Packages and services.
-11. Receipe - Resources are gathered into a file called as Receipe which ensures that the system is in desired state. DSL(Domain specific language) used by chef are actually just a subset of Ruby.
-12. Cookbook - The fundamental unit of configuration and policy distribution. Each cookbook defines a scenario such as everything needed to install and configure MySQL. Then it contains all the components that are required to support this scenario. Can have 1 or more receipes and configuration.
-13. In workstation create a hello.rb file and chef-apply hello.rb to run it. This is running a receipe locally.
+11. recipe - Resources are gathered into a file called as recipe which ensures that the system is in desired state. DSL(Domain specific language) used by chef are actually just a subset of Ruby.
+12. Cookbook - The fundamental unit of configuration and policy distribution. Each cookbook defines a scenario such as everything needed to install and configure MySQL. Then it contains all the components that are required to support this scenario. Can have 1 or more recipes and configuration.
+13. In workstation create a hello.rb file and chef-apply hello.rb to run it. This is running a recipe locally.
 14. default action for a file is create. Similarly there will default actions for all resources.
 15. + is addition or new changes made, - removed the change.
 16. Chef workflow: Read, Test and Repair.
 17. Chef Client Server architecture and Chef Solo(the node itself is workstation and the recipes are run on the node directly)
-18. 
+18.     resourceType 'resourceName' do
+                state of the resource we want
+        end
+19. chef-solo --version, /var/chef is the default directory
+20. Resources are declarative - we say what we want to happen rather than how to happen.
+21.     package "apache2" do
+                action :install
+        end
+
+        service "apache2" do
+                action [:enable, :start]
+        end
+
+        template "/var/www/index.html" do
+                source "index.html.erb"
+                mode 0644
+        end
+22. Resources are executed in order.
+23. Run list is the ordered set of recipes and the roles that chef client will execute on a node.
+24. default run list is empty.
+25. in /var/chef create cookbooks/apache and have a default.rb in a folder recipes with contents from point 21. inside it create a templates folder and place index.html.erb. Then create a runlist.json file outside the cookbooks folder.
+        {
+                "run_list" : [ "recipe[apache]" ]
+        }
+26. Then run it 
+        chef-solo -j runlist.json
+27. Ohai commands collects data can be run anywhere.
+28. Attributes are used by the chef-client to understand the current state of the node. What the state of the node was at the end of the previous chef-client. What the state of the node should be at the end of the current chef-client run.
+29. Attributes are defined by: the state of the node itself, Cookbooks (in attribute fies and or recipes), Roles and Environments.
+30. Node attributes are hashes (key, value pairs). Reference has keys with square brackets and keys are string. Ex: node['hostname'], node['kernel']['machine']
+31. Retrieve a node attribute in the index.html.erb, the node attributes can be viewed by running 'ohai' command
+        <p>Hostname is <%= node['hostname'] %></p>
+32. Attributes can be set at various levels (increasing order of precedence): Ohai, Role, Environment, Recipes, Cookbook attribute files.
+33. Setting node attributes: ./cookbooks/cookbookName/attributes/default.rb
+        default["apache"]["dir"]="/home/mmabdul"
+Retrieve is using 
+        <%= node["apache"]["dir"] %>
+34. Since we are not using client server architecture we use chef-solo to test the recipe and the default chef directory is /var/chef
+        var
+                chef
+                        cookbooks
+                                cookbookName
+                                        recipes
+                                                default.rb
+                                        templates
+                                                index.html.erb
+                                        attributes
+                                                default.rb
+35. Create a cookbook using the knife command and upload the cookbook to the chef server. In order to run the cookbook on a node, add it to the runlist.
+        knife node run_list add nodeName "recipe[cookbookName]"
+36. Running the chef-client command on the node will apply the run_lists on the node that we configured. In the backgroun chef-client does the following steps
+        chef-client -> build node -> authenticate with server -> sync cookbooks -> load cookbooks -> converge -> success -> save node or exception -> notification handlers if exception
+37. knife command path /opt/chefdk/bin
+38. uploading cookbooks will replace existing cookbooks on the server if we dont change the version number. The version number can be change in metadata.rb file.
+39. Instead of attaching run_lists to 100's of vms individually, We can create Roles to group vms and run specific cookbooks on it. Like Webserver, DB, etc. We specify a run_list for a specific role and all vms with that role will have those run_lists run on it.
+40. Under the roles directory create webserver.json
+        {
+                "name": "webserver",
+                "default_attributes": {
+                        "apache":{
+                                "greeting":"Assalamualaikum"
+                        }
+                },
+                "run_list": ["recipe[apache]"]
+        }
+41. Role must have a name, can have description, may have run_list, may set or override attributes.
+42. Upload the roles to the chef server
+        knife role from file webserver.json
+43. To view information of a node
+        knife node show nodeName
+44. To remove a runlist from a node.
+        knife node run list remove nodeName "recipe[apache]"
+45. Add a role to a node
+        knife node run list add nodeName "role[webserver]"
+46. Environments logical grouping for dev, test and prod. Different types of environments may need different versions
+47.     knife environment show _default
+Organisation is for different infrastructure.
+Environment same infrastructure but different configuration.
+48.     knife cookbook show cookbookName
+        knife environment list
+49.  create an environments directory parallel to cookbooks and have a dev.rb file
+        name "dev"
+        description "Development use!"
+        cookbook "apache", "=0.2.0"
+50. In the cookbooks directory update the version of apache and make some change to the template and upload the cookbook.
+51. We can generate a cookbook using chef or knife. knife will have the cookbook placed in /var/chef/cookbooks whereas chef will create in your current directory.
+52. Upload the environment
+        knife environment from file dev.rb
+        knife environment list
+        knife environment show dev
+53. Change the environment from our node from _default to dev from the UI.
+54. On the node run the chef-client
+55. We need to schedule the chef-client command to run on the nodes periodically for it to be in the correct state as expected by the server/cookbook. We can use jenkins or cron.
+56.     knife show node nodeName -l
+        knife search node "platform:ubuntu"
+Get the result of uptime(command) from all the nodes with role webserver and user root.
+        knife ssh "role:webserver" "uptime" -x root
